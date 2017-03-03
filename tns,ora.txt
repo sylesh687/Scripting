@@ -1,0 +1,56 @@
+SEON012 =
+  (DESCRIPTION =
+    (ADDRESS_LIST =
+      (ADDRESS = (PROTOCOL = TCP)(HOST = $PrimaryServer )(PORT = 1521))
+    )
+    (CONNECT_DATA =
+      (SID = SEON012)
+      (SERVICE_NAME = SEON012$Domain)
+      (UR = A)
+    )
+  )
+
+SEON012 =
+  (DESCRIPTION =
+    (ADDRESS_LIST =
+      (ADDRESS = (PROTOCOL = TCP)(HOST = $StandbyHostName)(PORT = 1521))
+    )
+    (CONNECT_DATA =
+      (SID = SEON012)
+      (SERVICE_NAME = SEON012)
+      (UR = A)
+    )
+  )
+  
+SEON012DG =
+  (DESCRIPTION =
+    (ADDRESS_LIST =
+      (ADDRESS = (PROTOCOL = TCP)(HOST = $PrimaryServer )(PORT = 1521))
+      (ADDRESS = (PROTOCOL = TCP)(HOST = $StandbyHostName )(PORT = 1521))
+      (LOAD_BALANCE = no)
+    )
+    (CONNECT_DATA =
+      (SERVICE_NAME =SEON012DG)
+    )
+  )
+
+EON012_DGMGRL =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = $PrimaryServer)(PORT = 1521))
+    (CONNECT_DATA =
+      (SERVICE_NAME = EON012_DGMGRL)
+      (Instance_NAME = EON012)
+    )
+  )
+
+EON012_DGMGRL =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = $StandbyHostName)(PORT = 1521))
+    (CONNECT_DATA =
+      (SERVICE_NAME = EON012_DGMGRL)
+      (Instance_NAME = EON012)
+    )
+  )
+  
+  LISTENER_EON012_1521 = (ADDRESS = (PROTOCOL = TCP)(HOST = $StandbyHostName)(PORT = 1521))
+  LISTENER_EON012_1521 = (ADDRESS = (PROTOCOL = TCP)(HOST = $PrimaryServer)(PORT = 1521)) 

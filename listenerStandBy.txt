@@ -1,0 +1,15 @@
+SID_LIST_LISTENER_SEON12_1521 =
+  (SID_LIST =
+    (SID_DESC =
+      (GLOBAL_DBNAME=SEON12_DGMGRL)
+      (SID_NAME = SEON12)
+      (ORACLE_HOME = /oracle/11.2.0.4)
+    )
+
+    (SID_DESC =
+      (GLOBAL_DBNAME=SEON12)
+      (SID_NAME = SEON12)
+      (ORACLE_HOME = /oracle/11.2.0.4)
+    )
+
+  )

@@ -1,0 +1,66 @@
+
+LISTENER_SEON12_1521 =
+  (ADDRESS = (PROTOCOL = TCP)(HOST = localhost)(PORT = 1521))
+
+EON12 =
+  (DESCRIPTION =
+    (ADDRESS_LIST =
+          (ADDRESS = (PROTOCOL = TCP)
+                     (HOST = defreon3318.eontstmpc.svcs.hpe.com)
+                     (PORT = 1521) )
+
+    )
+      (CONNECT_DATA =
+        (SERVER = DEDICATED)
+(SERVICE_NAME = EON12)
+      )
+  )
+
+
+SEON12 =
+  (DESCRIPTION =
+    (ADDRESS_LIST =
+          (ADDRESS = (PROTOCOL = TCP)
+                     (HOST = defreon3320.eontstmpc.svcs.hpe.com)
+                     (PORT = 1521) )
+
+    )
+      (CONNECT_DATA =
+        (SERVER = DEDICATED)
+        (SERVICE_NAME = SEON12)
+      )
+  )
+
+
+LISTENER_EON12_1521 =
+  (ADDRESS = (PROTOCOL = TCP)(HOST = localhost)(PORT = 1521))
+
+EON12DG =
+  (DESCRIPTION =
+    (ADDRESS_LIST =
+      (ADDRESS = (PROTOCOL = TCP)(HOST = defreon3318 )(PORT = 1521))
+      (ADDRESS = (PROTOCOL = TCP)(HOST = defreon3320 )(PORT = 1521))
+      (LOAD_BALANCE = no)
+    )
+    (CONNECT_DATA =
+      (SERVICE_NAME = EON12DG)
+    )
+  )
+
+EON12_DGMGRL =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = defreon3318)(PORT = 1521))
+    (CONNECT_DATA =
+      (SERVICE_NAME = EON12_DGMGRL)
+      (Instance_NAME = EON12)
+    )
+  )
+
+SEON12_DGMGRL =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = defreon3318)(PORT = 1521))
+    (CONNECT_DATA =
+      (SERVICE_NAME = SEON12_DGMGRL)
+      (Instance_NAME = SEON12)
+    )
+)
