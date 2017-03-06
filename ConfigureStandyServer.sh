@@ -281,7 +281,7 @@ DataGaurdPreInstall(){
     logging -p $ProgramName -f $LOGFILE -l INFO -m "Checking if init${OracleSid}.ora exits  !!!!!"
     
     
-    if [ ! -f $OracleHome/dbs/init${OracleSid}.ora ]; then
+    if [ ! -f $OracleHome/dbs/init${OracleSid}.ora ] then
     
           echo "NEED TO CREATE"
           logging -p $ProgramName -f $LOGFILE -l WARNING -m "File init${OracleSid}.ora doesnot Exist !!!!!"
@@ -292,7 +292,7 @@ DataGaurdPreInstall(){
           echo "db_name=$Dbname" >> $OracleHome/dbs/init${OracleSid}.ora
           logging -p $ProgramName -f $LOGFILE -l INFO -m "SuccessFully writted   db_name=$Dbname  to init${OracleSid}.ora    !!!!!"
           
-    elif [ ! -f $OracleHome/network/admin/listener.ora ]; then
+    elif [ ! -f $OracleHome/network/admin/listener.ora ] then
           
           logging -p $ProgramName -f $LOGFILE -l WARNING -m "Listener file Does not Exists !!!!!"
          
@@ -363,147 +363,6 @@ ADR_BASE_LISTENER_$ORacleSid_$Port = /oracle" > $OracleHome/network/admin/listen
       
             fi   
       fi
-#----------------------------------------------------------------------------------------------------------------------------------------
-#                                            tnsnames.ora
-
-echo $Dbname
-
-      logging -p $ProgramName -f $LOGFILE -l INFO -m "Creating the tnsnames.ora !!!!!"
-      
-      if [ ! -f $OracleHome/network/admin/tnsnames.ora ]; then
-      logging -p $ProgramName -f $LOGFILE -l WARNING -m "tnsnames.ora file is not present NEED TO CREATE!!!!!"
-      logging -p $ProgramName -f $LOGFILE -l INFO -m "Creating tnsnames.ora file !!!!!"
-            touch $OracleHome/network/admin/tnsnames.ora
-      logging -p $ProgramName -f $LOGFILE -l INFO -m "tnsnames.ora if successfully Created !!!!!"
-      
-      logging -p $ProgramName -f $LOGFILE -l INFO -m "Writing the content to the tnsnames.ora file!!!!!"
-echo "
- ${Dbname}$Domain =
-  (DESCRIPTION =
-    (ADDRESS_LIST =
-      (ADDRESS = (PROTOCOL = TCP)(HOST = $PrimaryServer )(PORT = $Port))
-    )
-    (CONNECT_DATA =
-      (SID = $Dbname)
-      (SERVICE_NAME = $Dbname$Domain)
-      (UR = A)
-    )
-  )
-
-${OracleSid}$Domain =
-  (DESCRIPTION =
-    (ADDRESS_LIST =
-      (ADDRESS = (PROTOCOL = TCP)(HOST = $StandbyHostName)(PORT = $Port))
-    )
-    (CONNECT_DATA =
-      (SID = $OracleSid)
-      (SERVICE_NAME = ${OracleSid}$Domain)
-      (UR = A)
-    )
-  )
-  
-${Dbname}DG${Domain} =
-  (DESCRIPTION =
-    (ADDRESS_LIST =
-      (ADDRESS = (PROTOCOL = TCP)(HOST = $PrimaryServer )(PORT = $Port))
-      (ADDRESS = (PROTOCOL = TCP)(HOST = $StandbyHostName )(PORT = $Port))
-      (LOAD_BALANCE = no)
-    )
-    (CONNECT_DATA =
-      (SERVICE_NAME =${Dbname}DG${Domain})
-    )
-  )
-
-${PrimarySid}_DGMGRL${Domain} =
-  (DESCRIPTION =
-    (ADDRESS = (PROTOCOL = TCP)(HOST = $PrimaryServer)(PORT = $Port))
-    (CONNECT_DATA =
-      (SERVICE_NAME = ${PrimarySid}_DGMGRL${Domain})
-      (Instance_NAME = $PrimarySid)
-    )
-  )
-
-${OracleSid}_DGMGRL${Domain} =
-  (DESCRIPTION =
-    (ADDRESS = (PROTOCOL = TCP)(HOST = $StandbyHostName)(PORT = $PORT))
-    (CONNECT_DATA =
-      (SERVICE_NAME = ${OracleSid}_DGMGRL${Domain})
-      (Instance_NAME = $OracleSid)
-    )
-  )
-  
-  LISTENER_${OracleSid}_${Port} = (ADDRESS = (PROTOCOL = TCP)(HOST = $StandbyHostName)(PORT = $Port))
-  LISTENER_${PrimarySid}_${Port} = (ADDRESS = (PROTOCOL = TCP)(HOST = $PrimaryServer)(PORT = $Port))  " > $OracleHome/network/tnsnames.ora
- 
- 
- logging -p $ProgramName -f $LOGFILE -l INFO -m "tnsnames.ora file is Successfully written with correct content !!!!!"
-  
-            
-    else 
-      
- echo "
- ${Dbname}$Domain =
-  (DESCRIPTION =
-    (ADDRESS_LIST =
-      (ADDRESS = (PROTOCOL = TCP)(HOST = $PrimaryServer )(PORT = $Port))
-    )
-    (CONNECT_DATA =
-      (SID = $Dbname)
-      (SERVICE_NAME = $Dbname$Domain)
-      (UR = A)
-    )
-  )
-
-${OracleSid}$Domain =
-  (DESCRIPTION =
-    (ADDRESS_LIST =
-      (ADDRESS = (PROTOCOL = TCP)(HOST = $StandbyHostName)(PORT = $Port))
-    )
-    (CONNECT_DATA =
-      (SID = $OracleSid)
-      (SERVICE_NAME = ${OracleSid}$Domain)
-      (UR = A)
-    )
-  )
-  
-  ${Dbname}DG${Domain} =
-  (DESCRIPTION =
-    (ADDRESS_LIST =
-      (ADDRESS = (PROTOCOL = TCP)(HOST = $PrimaryServer )(PORT = $Port))
-      (ADDRESS = (PROTOCOL = TCP)(HOST = $StandbyHostName )(PORT = $Port))
-      (LOAD_BALANCE = no)
-    )
-    (CONNECT_DATA =
-      (SERVICE_NAME =${Dbname}DG${Domain})
-    )
-  )
-
-${PrimarySid}_DGMGRL${Domain} =
-  (DESCRIPTION =
-    (ADDRESS = (PROTOCOL = TCP)(HOST = $PrimaryServer)(PORT = $Port))
-    (CONNECT_DATA =
-      (SERVICE_NAME = ${PrimarySid}_DGMGRL${Domain})
-      (Instance_NAME = $PrimarySid)
-    )
-  )
-
-${OracleSid}_DGMGRL${Domain} =
-  (DESCRIPTION =
-    (ADDRESS = (PROTOCOL = TCP)(HOST = $StandbyHostName)(PORT = $Port))
-    (CONNECT_DATA =
-      (SERVICE_NAME = ${OracleSid}_DGMGRL${Domain})
-      (Instance_NAME = $OracleSid)
-    )
-  )
-  
-  LISTENER_${OracleSid}_$Port = (ADDRESS = (PROTOCOL = TCP)(HOST = $StandbyHostName)(PORT = $Port))
-  LISTENER_${PrimarySid}_$Port = (ADDRESS = (PROTOCOL = TCP)(HOST = $PrimaryServer)(PORT = $Port))  " > $OracleHome/network/admin/tnsnames.ora
- 
-  
-      
-      
-      fi 
- 
 
 #--------------------------------------------------------------------------------------------------------------------
 #                      Checking the listener status  on Standby and its owner 
