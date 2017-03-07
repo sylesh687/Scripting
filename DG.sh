@@ -37,7 +37,7 @@ usage () {
         exit 1
     fi
 #----------------------------------------------------------------------------------------
-while getopts d:f:g:h: req;do
+while getopts d:o:s:p: req;do
         case $req in
 
         d) Dbname=$OPTARG;;
@@ -67,7 +67,29 @@ export TimeStamp
 
 LOGFILE=/var/${ProgramName}.${TimeStamp}.log
 
+#---------------------------------------------------------------------------------------
+#	Function to track the command Status / But will not terminate program during fauiure
 
+cmd_status() {
+if [ $? = 0 ]
+then
+	logging -p $ProgramName -f $LOGFILE -l INFO -m "$1"
+else
+	logging -p $ProgramName -f $LOGFILE -l WARNING -m "$2"
+fi
+}
+#---------------------------------------------------------------------------------------
+#	Function to track the command Status and will terminate program during fauiure
+
+cmd_status_exit() {
+if [ $? = 0 ]
+then
+	logging -p $ProgramName -f $LOGFILE -l INFO -m "$1"
+else
+	logging -p $ProgramName -f $LOGFILE -l ERROR -m "$2"
+	exit 1
+fi
+}
 #-------------------------------------------------------------------------------
 # Name: logging
 # Description: This Function Creates log file
@@ -99,25 +121,6 @@ logging () {
 
 }
 
-#------------------------------------------------------------------------------------
-# Name: CommanExitStatus
-# Description : Checks th Exit status of Command and loggs
-#------------------------------------------------------------------------------------
-
-CommandExitStatus() {
-
-        if [ $? = 0 ]
-                then
-                        logging -p $PROGNAME -f $LOGFILE -l INFO -m "$1"
-        else
-                        logging -p $PROGNAME -f $LOGFILE -l ERROR -m "$2"
-        exit 1
-        fi
-}
-
-
-
-
 #-----------------------------------------------------------------------------------
 # Name: DataGaurdPreInstall
 # Description : Creates a Pre Install Script for DataGaurd
@@ -129,74 +132,55 @@ DataGaurdPreInstall(){
     logging -p $ProgramName -f $LOGFILE -l INFO -m "------------------------------------------------------"
     logging -p $ProgramName -f $LOGFILE -l INFO -m "!!! DATAGUARD PRE SETUP ON $StandbyHostName Started !!!"
     logging -p $ProgramName -f $LOGFILE -l INFO -m " ------------------------------------------------------"
+	
+	logging -p $ProgramName -f $LOGFILE -l INFO -m "Checking for the Preinstalls for DataGaurd !!!!"
+    logging -p $ProgramName -f $LOGFILE -l INFO -m "DataGaurd Preinstall Started !!!!"
+
 
 #------------------------------------------------------------------------------------
 #                        Checking the File ownership of /oracle dir
 
 
       logging -p $ProgramName -f $LOGFILE -l INFO -m "Changing the ownership or /oracle form root:root to oracle:oinstall !!!!"
+	  
       userStatus=$(passwd -S oracle | cut -d '(' -f2 | cut -d ',' -f1)
-      echo $userStatus
+      
       actualValue="Password set"
+	  
                 if [ "${userStatus}" == "${actualValue}" ]; then
+				
                         logging -p $ProgramName -f $LOGFILE -l INFO -m "Setting Password for the oracle user !!!!"
                         echo -e "Oracle123\nOracle123" | (passwd oracle)
-                                                if [ $? -eq 0 ]; then
-
-                                                         logging -p $ProgramName -f $LOGFILE -l INFO -m "Password is SuccessFully Set !!!!"
-                                                else
-                                                         logging -p $ProgramName -f $LOGFILE -l Warning -m "Password Set Failed!!!!"
-                                                fi
-
-
+						
+						cmd_status_exit "Password is SuccessFully Set !!!!" "Password Set Failed!!!!"
+						
                         logging -p $ProgramName -f $LOGFILE -l INFO -m "Password for the Oracle User is already Set and is Unlocked !!!!"
 
                 else
-                        logging -p $ProgramName -f $LOGFILE -l INFO -m "USer Oracle is locked Need to Unlock !!!!"
+				
+                        logging -p $ProgramName -f $LOGFILE -l INFO -m "User Oracle is locked Need to Unlock !!!!"
                         logging -p $ProgramName -f $LOGFILE -l INFO -m "Unlocking the Oracle User !!!!"
-                        pam_tally2  -u oracle  -r
-
-                        if [ $? -eq 0 ];
-                        then
-                                        logging -p $ProgramName -f $LOGFILE -l INFO -m "Oracle User is Successfully unlocked !!!!"
-                                        logging -p $ProgramName -f $LOGFILE -l INFO -m "Setting Password for the oracle user !!!!"
-                                        echo -e "Oracle123\nOracle123" | (passwd oracle)
-                                                if [ $? -eq 0 ]; then
-
-                                                         logging -p $ProgramName -f $LOGFILE -l INFO -m "Password is SuccessFully Set !!!!"
-                                                else
-                                                         logging -p $ProgramName -f $LOGFILE -l Warning -m "Password Set Failed!!!!"
-                                                fi
-
-
-                        else
-                                        logging -p $ProgramName -f $LOGFILE -l INFO -m "Unable to unlock the oracle user !!!!"
-
-                        fi
+                        
+						pam_tally2  -u oracle  -r
+						
+						cmd_status_exit "Oracle User is Successfully unlocked !!!!" "Unable to Unlock !!!!"
+						
+						logging -p $ProgramName -f $LOGFILE -l INFO -m "Setting Password for the oracle user !!!!"
+						echo -e "Oracle123\nOracle123" | (passwd oracle)
+						
+						cmd_status_exit "Password is SuccessFully Set !!!!" "Password Set Failed!!!!"
+						 
 
                 fi
-
+			
+			logging -p $ProgramName -f $LOGFILE -l INFO -m "Setting the ownership for /oracle dir !!!!"
+			
             chown oracle:oinstall /oracle
-            if [ $? -eq 0 ]; then
-
-
-                  logging -p $ProgramName -f $LOGFILE -l INFO -m "The owenerhsip of /oracle is changed from root:root to oracle:oinstall"
-
-            else
-
-                  echo "Failed to to change ownership!! Due to some permission issues"
-                  logging -p $ProgramName -f $LOGFILE -l INFO -m "Failed to to change ownership!! Due to some permission issues One Should be a root user to do so!!!"
-
-            fi
-
-
-
-
+			cmd_status_exit "The owenerhsip of /oracle is changed from root:root to oracle:oinstall" "Failed to to change ownership!! Due to some permission issues One Should be a root user to do so!!!"
+            
 #---------------------------------------------------------------------------------------
 
-      logging -p $ProgramName -f $LOGFILE -l INFO -m "Checking for the Preinstalls for DataGaurd !!!!"
-      logging -p $ProgramName -f $LOGFILE -l INFO -m "DataGaurd Preinstall Started !!!!"
-
+     
 
       if [ ! -f /etc/oratab ]; then
 
@@ -205,12 +189,13 @@ DataGaurdPreInstall(){
 
             su - oracle -c "touch /etc/oratab"
 
-           CommandExitStatus "/etc/oratab File is SuccessFully Crreated !!!" "Failure creating oratab "
+           exit_status "/etc/oratab File is SuccessFully Crreated !!!" "Failure creating oratab "
+		   
            logging -p $ProgramName -f $LOGFILE -l INFO -m "Writing the Valid Content to the file /etc/oratab FILE!!!!!"
 
            su - oracle -c echo $OraEntry >> /etc/oratab
 
-           CommandExitStatus "/etc/oratab FILE is written with a valid content !!!" "Failure writing oratab "
+           exit_status "/etc/oratab FILE is written with a valid content !!!" "Failure writing oratab "
 
 
 
@@ -233,6 +218,8 @@ DataGaurdPreInstall(){
                    logging -p $ProgramName -f $LOGFILE -l INFO -m "Adding a Entry to /etc/oratab File !!!!!"
 
                    echo $OraEntry >> /etc/oratab
+				   
+				   exit_status "/etc/oratab FILE is written with a valid content !!!" "Failure writing oratab "
 
                    logging -p $ProgramName -f $LOGFILE -l INFO -m "/etc/oratab FILE is written with a valid content !!!!!"
 
@@ -249,10 +236,9 @@ DataGaurdPreInstall(){
 
    OracleSid=$(grep "$OraEntry" /etc/oratab | cut -d':' -f1,1)
 
-   echo $OracleSid
+   #echo $OracleSid
 
-   if grep -Fxq "export ORACLE_SID=${OracleSid}" /home/oracle/.bash_profile
-             then
+   if grep -Fxq "export ORACLE_SID=${OracleSid}" /home/oracle/.bash_profile ; then
 
                    logging -p $ProgramName -f $LOGFILE -l INFO -m "The bash_profile File Has a  Valid Content !!!!!"
 
@@ -263,6 +249,8 @@ DataGaurdPreInstall(){
                    logging -p $ProgramName -f $LOGFILE -l INFO -m "Adding a Entry to bash_profile!!!!!"
 
                    echo "export ORACLE_SID=${OracleSid}" >> /home/oracle/.bash_profile
+				  
+				  exit_status "SID is added to users bash file !!!" "Failure writing bash_profile "
 
                    logging -p $ProgramName -f $LOGFILE -l INFO -m "Adding a Entry to bash_profile is Done!!!!!"
 
@@ -282,21 +270,25 @@ DataGaurdPreInstall(){
 
            su - oracle -c "mkdir  /oracle/oradata/$OracleSid"
 
-           logging -p $ProgramName -f $LOGFILE -l INFO -m " Correct folder Structure Created !!!!"
+		   exit_status "Correct folder Structure Created --  /oracle/oradata/${OracleSid} !!!!" "Failed writing to create /oracle/oradata/${OracleSid} "
+           
            logging -p $ProgramName -f $LOGFILE -l INFO -m " Changing to $OracleSid dir !!!!"
 
            cd /oracle/oradata/$OracleSid
-
-           logging -p $ProgramName -f $LOGFILE -l INFO -m " Changedto $OracleSid dir !!!!"
-           logging -p $ProgramName -f $LOGFILE -l INFO -m " Correct three folders in $OracleSid dir !!!!"
+		  
+		   exit_status "Changedto $OracleSid dir !!!!" "Failed changing to ${OracleSid} "
+           
+           logging -p $ProgramName -f $LOGFILE -l INFO -m " Creating controlfile datafile onlinelog in   ${OracleSid dir} !!!!"
 
            su - oracle -c "mkdir  controlfile datafile onlinelog"
 
+		   exit_status "Created controlfile datafile onlinelog in   ${OracleSid dir} !!!!" "Failed  to create controlfile datafile onlinelog  ${OracleSid} "
+		   
            logging -p $ProgramName -f $LOGFILE -l WARNING -m "Correct Folder Structure  for recovery area Doesnot Exist !!!!"
            logging -p $ProgramName -f $LOGFILE -l INFO -m "Creating the Correct folder Structure !!!!"
 
            su - oracle -c "mkdir  /oracle/recovery_area/$OracleSid"
-
+		   exit_status "Created controlfile datafile onlinelog in   ${OracleSid dir} !!!!" "Failed  to create controlfile datafile onlinelog  ${OracleSid} "
            logging -p $ProgramName -f $LOGFILE -l INFO -m " Correct folder Structure Created !!!!"
 
            cd /oracle/recovery_area/$OracleSid
@@ -313,7 +305,7 @@ DataGaurdPreInstall(){
     fi
 
 #-----------------------------------------------------------------------------------------------------------------------------
-#i
+#
     OracleHome=$(grep $OraEntry /etc/oratab | cut -d':' -f2)
 
     logging -p $ProgramName -f $LOGFILE -l INFO -m "Checking if init${OracleSid}.ora exits  !!!!!"
@@ -336,7 +328,7 @@ DataGaurdPreInstall(){
 
           logging -p $ProgramName -f $LOGFILE -l INFO -m "Creating the Listener File on Standby Server !!!!!"
           touch $OracleHome/network/admin/listener.ora
-          CommandExitStatus " Listener File  successfully Created !!!" "Failed to Listener please check with the permission"
+          exit_status " Listener File  successfully Created !!!" "Failed to Listener please check with the permission"
           logging -p $ProgramName -f $LOGFILE -l INFO -m "Putting the Content to the listener.ora !!!!!"
 
 echo "LISTENER_${OracleSid}_${Port} =
@@ -362,7 +354,7 @@ ADR_BASE_LISTENER_$OracleSid}_${Port} = /oracle" >> $OracleHome/network/admin/li
 
           else
 
-              if grep -Fxq "db_name=$Dbname" $OracleHome/dbs/init$OracleSid.ora
+              if grep -Fxq "db_name=$Dbname" $OracleHome/dbs/init$OracleSid.ora ;
 
                 then
 
@@ -415,18 +407,14 @@ ADR_BASE_LISTENER_$ORacleSid_$Port = /oracle" > $OracleHome/network/admin/listen
 
             echo $status | grep -q "tnslsnr"
 
+			exit_status_exit "Listener is running on the Standy Server !!!!" "Listener is not running on the $stbyServer !!! Need to Start Manyally"
 
-        if [ $? -eq 0 ]; then
-
-                      echo "Listener is running on the Standy Server"
-
-                      logging -p $ProgramName -f $LOGFILE -l INFO -m "Listener is running on the Standy Server !!!!!"
+			logging -p $ProgramName -f $LOGFILE -l INFO -m "Listener is running on the Standy Server !!!!!"
 
                       owned=$(echo ${status} | cut -d ' ' -f1)
                       pid=$(echo ${status} | cut -d ' ' -f2)
-
-
-
+					  
+					
                       if [ "${owned}" == "oracle" ]; then
 
                              logging -p $ProgramName -f $LOGFILE -l INFO -m "IT IS FINE Listener on Stanby Server is Running as a oracle !!!!!"
@@ -437,40 +425,16 @@ ADR_BASE_LISTENER_$ORacleSid_$Port = /oracle" > $OracleHome/network/admin/listen
                            echo "Killing the Process"
                            logging -p $ProgramName -f $LOGFILE -l INFO -m "Killing the Process !!!!!"
                            kill  -KILL $pid
-                           if [ $? -eq 0 ]; then
-
-                                  logging -p $ProgramName -f $LOGFILE -l INFO -m "Process is successfully killed!!!"
-
-                            else
-                                  logging -p $ProgramName -f $LOGFILE -l INFO -m "Failed to to kill this process! Due to some permission issues One should have root previleges!!!"
-
-
-                           fi
+						   
+						   exit_status_exit "Process is successfully killed" "Failed to to kill this process! Due to some permission issues One should have root previleges!!!"
+						   logging -p $ProgramName -f $LOGFILE -l INFO -m "Starting the listener process as oracle!!!"
+						   su - oracle -c "/oracle/11.2.0.4/bin/lsnrctl start ${var4}"
+						   exit_status_exit "$var4 Process is successfully started as oracle!!!!!" "$var4 Failed to to kill this process! Due to some permission issues!!"
+         
                     fi
-
-      else
-
-
-        logging -p $ProgramName -f $LOGFILE -l INFO -m "Listener is not running on the $stbyServer !!! Need to Start Manyally"
-   logging -p $ProgramName -f $LOGFILE -l INFO -m "Starting the listener process as oracle!!!"
-
-          su - oracle -c "/oracle/11.2.0.4/bin/lsnrctl start ${var4}"
-
-          if [ $? -eq 0 ]; then
-
-                        logging -p $ProgramName -f $LOGFILE -l INFO -m "$var4 Process is successfully started as oracle!!!!!!"
-
-          else
-
-                        logging -p $ProgramName -f $LOGFILE -l INFO -m "$var4 Failed to to kill this process! Due to some permission issues"
-
-          fi
-
-      fi
+					
 
 
-#---------------------------------------------------------------------------------------------------------------------------------
 }
-
 
 DataGaurdPreInstall
