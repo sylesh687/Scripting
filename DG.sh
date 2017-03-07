@@ -203,12 +203,12 @@ DataGaurdPreInstall(){
            logging -p $ProgramName -f $LOGFILE -l INFO -m "Checking for the oratab file !!!!! IT IS NOT PRESENT"
            logging -p $ProgramName -f $LOGFILE -l INFO -m "Creating New Oratab File !!!!!"
 
-           touch /etc/oratab
+            su - oracle -c "touch /etc/oratab"
 
            CommandExitStatus "/etc/oratab File is SuccessFully Crreated !!!" "Failure creating oratab "
            logging -p $ProgramName -f $LOGFILE -l INFO -m "Writing the Valid Content to the file /etc/oratab FILE!!!!!"
 
-           echo $OraEntry >> /etc/oratab
+           su - oracle -c echo $OraEntry >> /etc/oratab
 
            CommandExitStatus "/etc/oratab FILE is written with a valid content !!!" "Failure writing oratab "
 
@@ -280,7 +280,7 @@ DataGaurdPreInstall(){
            logging -p $ProgramName -f $LOGFILE -l WARNING -m "Correct Folder Structure  for oradata Doesnot Exist !!!!"
            logging -p $ProgramName -f $LOGFILE -l INFO -m "Creating the Correct folder Structure !!!!"
 
-           mkdir -p /oracle/oradata/$OracleSid
+           su - oracle -c "mkdir  /oracle/oradata/$OracleSid"
 
            logging -p $ProgramName -f $LOGFILE -l INFO -m " Correct folder Structure Created !!!!"
            logging -p $ProgramName -f $LOGFILE -l INFO -m " Changing to $OracleSid dir !!!!"
@@ -290,12 +290,12 @@ DataGaurdPreInstall(){
            logging -p $ProgramName -f $LOGFILE -l INFO -m " Changedto $OracleSid dir !!!!"
            logging -p $ProgramName -f $LOGFILE -l INFO -m " Correct three folders in $OracleSid dir !!!!"
 
-           mkdir  controlfile datafile onlinelog
+           su - oracle -c "mkdir  controlfile datafile onlinelog"
 
            logging -p $ProgramName -f $LOGFILE -l WARNING -m "Correct Folder Structure  for recovery area Doesnot Exist !!!!"
            logging -p $ProgramName -f $LOGFILE -l INFO -m "Creating the Correct folder Structure !!!!"
 
-           mkdir -p /oracle/recovery_area/$OracleSid
+           su - oracle -c "mkdir  /oracle/recovery_area/$OracleSid"
 
            logging -p $ProgramName -f $LOGFILE -l INFO -m " Correct folder Structure Created !!!!"
 
@@ -304,7 +304,7 @@ DataGaurdPreInstall(){
            logging -p $ProgramName -f $LOGFILE -l INFO -m " Changedto $OracleSid dir !!!!"
            logging -p $ProgramName -f $LOGFILE -l INFO -m " Correct three folders in $OracleSid dir !!"
 
-           mkdir controlfile archivelog onlinelog
+           su - oracle -c "mkdir controlfile archivelog onlinelog"
 
 
     else
@@ -324,7 +324,7 @@ DataGaurdPreInstall(){
           echo "NEED TO CREATE"
           logging -p $ProgramName -f $LOGFILE -l WARNING -m "File init${OracleSid}.ora doesnot Exist !!!!!"
           logging -p $ProgramName -f $LOGFILE -l INFO -m "Creating init${OracleSid}.ora file  !!!!!"
-          touch $OracleHome/dbs/init${OracleSid}.ora
+          su - oracle -c "touch $OracleHome/dbs/init${OracleSid}.ora"
           logging -p $ProgramName -f $LOGFILE -l INFO -m "SuccessFully created init${OracleSid}.ora   !!!!!"
           logging -p $ProgramName -f $LOGFILE -l INFO -m "Writing  db_name=$Dbname  to init${OracleSid}.ora    !!!!!"
           echo "db_name=$Dbname" >> $OracleHome/dbs/init${OracleSid}.ora
