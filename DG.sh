@@ -5,12 +5,13 @@
 # Description: This Script Prepares Standby Server For DataGaurd
 # Version: 1.0
 # Maintainer: Shailesh Thakur
-# Example:sh ConfigureStandyServer.sh -d "EONT12" -o "EONT12" -p "defreon3332.eontstmpc.svcs.hpe.com" -s "defreon3342.eontstmpc.svcs.hpe.com"
+# Example:sh ConfigureStandyServer.sh -d "EONT12" -o "EONT12" -s "defreon3332.eontstmpc.svcs.hpe.com" -p "defreon3342.eontstmpc.svcs.hpe.com"
 # ---------------------------------------------------------------------------------
 
 
 #---------------------------------------------------------------------------------
 usage () {
+
         ERRORNUM=$1
 
         echo "Version: 1.0"
@@ -50,7 +51,8 @@ while getopts d:o:s:p: req;do
 done
 Port="1521"
 #Domain=.$DomainName
-OraEntry="SEONT12:/oracle/11.2.0.4:N"
+OracleSid=S${PrimarySid}
+OraEntry="${PrimarySid}:/oracle/11.2.0.4:N"
 
 ProgramName=$(basename $0)
 
@@ -234,7 +236,7 @@ DataGaurdPreInstall(){
    logging -p $ProgramName -f $LOGFILE -l INFO -m "Checking if ORACLE_SID is present in users bash_profile"
    logging -p $ProgramName -f $LOGFILE -l INFO -m "Creating OracleSid Variable from OraEntry"
 
-   OracleSid=$(grep "$OraEntry" /etc/oratab | cut -d':' -f1,1)
+   #OracleSid=$(grep "$OraEntry" /etc/oratab | cut -d':' -f1,1)
 
    #echo $OracleSid
 
@@ -274,15 +276,15 @@ DataGaurdPreInstall(){
            
            logging -p $ProgramName -f $LOGFILE -l INFO -m " Changing to $OracleSid dir !!!!"
 
-           cd /oracle/oradata/$OracleSid
+           cd /oracle/oradata/${OracleSid}
 		  
-		   exit_status "Changedto $OracleSid dir !!!!" "Failed changing to ${OracleSid} "
+		   exit_status "Changedto ${OracleSid} dir !!!!" "Failed changing to ${OracleSid} "
            
            logging -p $ProgramName -f $LOGFILE -l INFO -m " Creating controlfile datafile onlinelog in   ${OracleSid dir} !!!!"
 
            su - oracle -c "mkdir  controlfile datafile onlinelog"
 
-		   exit_status "Created controlfile datafile onlinelog in   ${OracleSid dir} !!!!" "Failed  to create controlfile datafile onlinelog  ${OracleSid} "
+		   exit_status "Created controlfile datafile onlinelog in   ${OracleSid} !!!!" "Failed  to create controlfile datafile onlinelog  ${OracleSid} "
 		   
            logging -p $ProgramName -f $LOGFILE -l WARNING -m "Correct Folder Structure  for recovery area Doesnot Exist !!!!"
            logging -p $ProgramName -f $LOGFILE -l INFO -m "Creating the Correct folder Structure !!!!"
@@ -311,18 +313,8 @@ DataGaurdPreInstall(){
     logging -p $ProgramName -f $LOGFILE -l INFO -m "Checking if init${OracleSid}.ora exits  !!!!!"
 
 
-    if [ ! -f $OracleHome/dbs/init${OracleSid}.ora ]; then
-
-          echo "NEED TO CREATE"
-          logging -p $ProgramName -f $LOGFILE -l WARNING -m "File init${OracleSid}.ora doesnot Exist !!!!!"
-          logging -p $ProgramName -f $LOGFILE -l INFO -m "Creating init${OracleSid}.ora file  !!!!!"
-          su - oracle -c "touch $OracleHome/dbs/init${OracleSid}.ora"
-          logging -p $ProgramName -f $LOGFILE -l INFO -m "SuccessFully created init${OracleSid}.ora   !!!!!"
-          logging -p $ProgramName -f $LOGFILE -l INFO -m "Writing  db_name=$Dbname  to init${OracleSid}.ora    !!!!!"
-          echo "db_name=$Dbname" >> $OracleHome/dbs/init${OracleSid}.ora
-          logging -p $ProgramName -f $LOGFILE -l INFO -m "SuccessFully writted   db_name=$Dbname  to init${OracleSid}.ora    !!!!!"
-
-    elif [ ! -f $OracleHome/network/admin/listener.ora ]; then
+    
+   if [ ! -f $OracleHome/network/admin/listener.ora ]; then
 
           logging -p $ProgramName -f $LOGFILE -l WARNING -m "Listener file Does not Exists !!!!!"
 
@@ -405,7 +397,7 @@ ADR_BASE_LISTENER_$ORacleSid_$Port = /oracle" > $OracleHome/network/admin/listen
 
         logging -p $ProgramName -f $LOGFILE -l INFO -m "Listener Status has be Success Fully Determined !!!!!"
 
-            echo $status | grep -q "tnslsnr"
+            echo ${status} | grep -q "tnslsnr"
 
 			exit_status_exit "Listener is running on the Standy Server !!!!" "Listener is not running on the $stbyServer !!! Need to Start Manyally"
 
