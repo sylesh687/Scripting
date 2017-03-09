@@ -123,6 +123,10 @@ logging () {
 
 }
 
+Run_As_Oracle_User(){
+	
+	su - oracle -c "$1"
+}
 #-----------------------------------------------------------------------------------
 # Name: DataGaurdPreInstall
 # Description : Creates a Pre Install Script for DataGaurd
@@ -189,13 +193,13 @@ DataGaurdPreInstall(){
            logging -p $ProgramName -f $LOGFILE -l INFO -m "Checking for the oratab file !!!!! IT IS NOT PRESENT"
            logging -p $ProgramName -f $LOGFILE -l INFO -m "Creating New Oratab File !!!!!"
 
-            su - oracle -c "touch /etc/oratab"
+            Run_As_Oracle_User "touch /etc/oratab"
 
            exit_status "/etc/oratab File is SuccessFully Crreated !!!" "Failure creating oratab "
 		   
            logging -p $ProgramName -f $LOGFILE -l INFO -m "Writing the Valid Content to the file /etc/oratab FILE!!!!!"
 
-           su - oracle -c echo $OraEntry >> /etc/oratab
+           Run_As_Oracle_User "echo $OraEntry >> /etc/oratab"
 
            exit_status "/etc/oratab FILE is written with a valid content !!!" "Failure writing oratab "
 
@@ -270,7 +274,7 @@ DataGaurdPreInstall(){
            logging -p $ProgramName -f $LOGFILE -l WARNING -m "Correct Folder Structure  for oradata Doesnot Exist !!!!"
            logging -p $ProgramName -f $LOGFILE -l INFO -m "Creating the Correct folder Structure !!!!"
 
-           su - oracle -c "mkdir  /oracle/oradata/$OracleSid"
+           Run_As_Oracle_User "mkdir  /oracle/oradata/$OracleSid"
 
 		   exit_status "Correct folder Structure Created --  /oracle/oradata/${OracleSid} !!!!" "Failed writing to create /oracle/oradata/${OracleSid} "
            
@@ -282,14 +286,14 @@ DataGaurdPreInstall(){
            
            logging -p $ProgramName -f $LOGFILE -l INFO -m " Creating controlfile datafile onlinelog in   ${OracleSid dir} !!!!"
 
-           su - oracle -c "mkdir  controlfile datafile onlinelog"
+           Run_As_Oracle_User "mkdir  controlfile datafile onlinelog"
 
 		   exit_status "Created controlfile datafile onlinelog in   ${OracleSid} !!!!" "Failed  to create controlfile datafile onlinelog  ${OracleSid} "
 		   
            logging -p $ProgramName -f $LOGFILE -l WARNING -m "Correct Folder Structure  for recovery area Doesnot Exist !!!!"
            logging -p $ProgramName -f $LOGFILE -l INFO -m "Creating the Correct folder Structure !!!!"
 
-           su - oracle -c "mkdir  /oracle/recovery_area/$OracleSid"
+           Run_As_Oracle_User "mkdir  /oracle/recovery_area/$OracleSid"
 		   exit_status "Created controlfile datafile onlinelog in   ${OracleSid dir} !!!!" "Failed  to create controlfile datafile onlinelog  ${OracleSid} "
            logging -p $ProgramName -f $LOGFILE -l INFO -m " Correct folder Structure Created !!!!"
 
@@ -298,7 +302,7 @@ DataGaurdPreInstall(){
            logging -p $ProgramName -f $LOGFILE -l INFO -m " Changedto $OracleSid dir !!!!"
            logging -p $ProgramName -f $LOGFILE -l INFO -m " Correct three folders in $OracleSid dir !!"
 
-           su - oracle -c "mkdir controlfile archivelog onlinelog"
+           Run_As_Oracle_User "mkdir controlfile archivelog onlinelog"
 
 
     else
@@ -319,7 +323,7 @@ DataGaurdPreInstall(){
           logging -p $ProgramName -f $LOGFILE -l WARNING -m "Listener file Does not Exists !!!!!"
 
           logging -p $ProgramName -f $LOGFILE -l INFO -m "Creating the Listener File on Standby Server !!!!!"
-          sudo - oracle -c "touch $OracleHome/network/admin/listener.ora
+          Run_As_Oracle_User "touch $OracleHome/network/admin/listener.ora"
           exit_status " Listener File  successfully Created !!!" "Failed to Listener please check with the permission"
           logging -p $ProgramName -f $LOGFILE -l INFO -m "Putting the Content to the listener.ora !!!!!"
 
@@ -420,7 +424,8 @@ ADR_BASE_LISTENER_$ORacleSid_$Port = /oracle" > $OracleHome/network/admin/listen
 						   
 						   exit_status_exit "Process is successfully killed" "Failed to to kill this process! Due to some permission issues One should have root previleges!!!"
 						   logging -p $ProgramName -f $LOGFILE -l INFO -m "Starting the listener process as oracle!!!"
-						   su - oracle -c "/oracle/11.2.0.4/bin/lsnrctl start ${var4}"
+						   
+						   Run_As_Oracle_User "/oracle/11.2.0.4/bin/lsnrctl start ${var4}"
 						   exit_status_exit "$var4 Process is successfully started as oracle!!!!!" "$var4 Failed to to kill this process! Due to some permission issues!!"
          
                     fi

@@ -50,7 +50,9 @@ while getopts d:f:g:h: req;do
 done
 Port="1521"
 #Domain=.$DomainName
-OraEntry="SEONT12:/oracle/11.2.0.4:N"
+OracleSid=S"${PrimarySid}"
+echo $OracleSid
+OraEntry="${OracleSid}:${OracleHome}:N"
 
 ProgramName=$(basename $0)
 
@@ -99,25 +101,6 @@ logging () {
 
 }
 
-#------------------------------------------------------------------------------------
-# Name: CommanExitStatus
-# Description : Checks th Exit status of Command and loggs
-#------------------------------------------------------------------------------------
-
-CommandExitStatus() {
-
-	if [ $? = 0 ]
-		then
-			logging -p $PROGNAME -f $LOGFILE -l INFO -m "$1"
-	else
-			logging -p $PROGNAME -f $LOGFILE -l ERROR -m "$2"
-	exit 1
-	fi
-}
-
-
-
-
 #-----------------------------------------------------------------------------------
 # Name: DataGaurdPreInstall
 # Description : Creates a Pre Install Script for DataGaurd 
@@ -129,6 +112,18 @@ DataGaurdPreInstall(){
     logging -p $ProgramName -f $LOGFILE -l INFO -m "------------------------------------------------------"
     logging -p $ProgramName -f $LOGFILE -l INFO -m "!!! DATAGUARD PRE SETUP ON $StandbyHostName Started !!!"
     logging -p $ProgramName -f $LOGFILE -l INFO -m " ------------------------------------------------------"
+	
+	
+#------------------------------------------------------------------------------------
+#						User Locking Problem
+
+	logging -p $ProgramName -f $LOGFILE -l INFO -m "Checking if the oracle user is locked !!!!"
+	
+		userStatus=$(passwd -S oracle | cut -d '(' -f2 | cut -d ',' -f1)
+		
+			if ["${userStatus}" == ""]
+			
+		
 
 #------------------------------------------------------------------------------------
 #                        Checking the File ownership of /oracle dir
