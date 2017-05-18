@@ -1,0 +1,10 @@
+LISTENER =
+  (DESCRIPTION_LIST =
+    (DESCRIPTION =
+      (ADDRESS = (PROTOCOL = TCP)(HOST = defreon3449.eontstmpc.svcs.hpe.com)(PORT = 1521))
+      (ADDRESS = (PROTOCOL = IPC)(KEY = EXTPROC1521))
+    )
+  )
+
+ADR_BASE_LISTENER = /oracle
+

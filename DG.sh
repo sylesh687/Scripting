@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 #----------------------------------------------------------------------------------
 # Name:ConfigureStandyServer.sh
@@ -290,7 +290,7 @@ DataGaurdPreInstall(){
            logging -p $ProgramName -f $LOGFILE -l INFO -m "Creating the Correct folder Structure !!!!"
 
            su - oracle -c "mkdir  /oracle/recovery_area/$OracleSid"
-		   exit_status "Created controlfile datafile onlinelog in   ${OracleSid dir} !!!!" "Failed  to create controlfile datafile onlinelog  ${OracleSid} "
+		   exit_status "Created controlfile datafile onlinelog in   ${OracleSid} !!!!" "Failed  to create controlfile datafile onlinelog  ${OracleSid} "
            logging -p $ProgramName -f $LOGFILE -l INFO -m " Correct folder Structure Created !!!!"
 
            cd /oracle/recovery_area/$OracleSid
@@ -319,9 +319,10 @@ DataGaurdPreInstall(){
           logging -p $ProgramName -f $LOGFILE -l WARNING -m "Listener file Does not Exists !!!!!"
 
           logging -p $ProgramName -f $LOGFILE -l INFO -m "Creating the Listener File on Standby Server !!!!!"
-          sudo - oracle -c "touch $OracleHome/network/admin/listener.ora
+          sudo - oracle -c "touch $OracleHome/network/admin/listener.ora"
           exit_status " Listener File  successfully Created !!!" "Failed to Listener please check with the permission"
           logging -p $ProgramName -f $LOGFILE -l INFO -m "Putting the Content to the listener.ora !!!!!"
+
 
 echo "LISTENER_${OracleSid}_${Port} =
   (DESCRIPTION_LIST =
@@ -337,36 +338,19 @@ SID_LIST_LISTENER_${OracleSid}_${Port} =
       (GLOBAL_DBNAME = $Dbname_DGMGRL)
       (ORACLE_HOME = $OracleHome)
       (SID_NAME = $OracleSid)
-   )
+    )
   )
 
-ADR_BASE_LISTENER_$OracleSid}_${Port} = /oracle" >> $OracleHome/network/admin/listener.ora
+ADR_BASE_LISTENER_$OracleSid}_${Port} = /oracle" > $OracleHome/network/admin/listener.ora
 
           logging -p $ProgramName -f $LOGFILE -l INFO -m "Putting the Content to the listener.ora  has been done !!!!!"
 
           else
-
-              if grep -Fxq "db_name=$Dbname" $OracleHome/dbs/init$OracleSid.ora ;
-
-                then
-
-                   logging -p $ProgramName -f $LOGFILE -l INFO -m "The $OracleHome/dbs/init$OracleSid.ora File Has a  Valid Content !!!!!"
-
-
-            else
-
-                   logging -p $ProgramName -f $LOGFILE -l INFO -m "The $OracleHome/dbs/init$OracleSid.ora Has no Valid Content !!!!!"
-                   logging -p $ProgramName -f $LOGFILE -l INFO -m "Adding a Entry to $OracleHome/dbs/init$OracleSid.ora !!!!!"
-
-                   echo "db_name=$Dbname" $OracleHome/dbs/init$OracleSid.ora
-
-                   logging -p $ProgramName -f $LOGFILE -l INFO -m "Adding a Entry to $OracleHome/dbs/init$OracleSid.ora is Done!!!!!"
-
-
+		  
 echo "LISTENER_${OracleSid}_${Port} =
   (DESCRIPTION_LIST =
     (DESCRIPTION =
-      (ADDRESS = (PROTOCOL = TCP)(HOST = $StandbyHostName)(PORT = $Port))
+      (ADDRESS = (PROTOCOL = TCP)(HOST = ${StandbyHostName})(PORT = ${Port}))
       (ADDRESS = (PROTOCOL = IPC)(KEY = EXTPROC1521))
     )
   )
@@ -380,10 +364,10 @@ SID_LIST_LISTENER_${OracleSid}_${Port} =
     )
   )
 
-ADR_BASE_LISTENER_$ORacleSid_$Port = /oracle" > $OracleHome/network/admin/listener.ora
+ADR_BASE_LISTENER_${ORacleSid}_${Port} = /oracle" > $OracleHome/network/admin/listener.ora
 
 
-            fi
+            
       fi
 
 #--------------------------------------------------------------------------------------------------------------------
@@ -399,7 +383,7 @@ ADR_BASE_LISTENER_$ORacleSid_$Port = /oracle" > $OracleHome/network/admin/listen
 
             echo ${status} | grep -q "tnslsnr"
 
-			exit_status_exit "Listener is running on the Standy Server !!!!" "Listener is not running on the $stbyServer !!! Need to Start Manyally"
+			exit_status_exit "Listener is running on the Standy Server !!!!" "Listener is not running on the ${StandbyHostName} !!! Need to Start Manyally"
 
 			logging -p $ProgramName -f $LOGFILE -l INFO -m "Listener is running on the Standy Server !!!!!"
 

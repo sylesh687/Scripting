@@ -121,7 +121,6 @@ DataGaurdPreInstall(){
 	
 		userStatus=$(passwd -S oracle | cut -d '(' -f2 | cut -d ',' -f1)
 		
-			if ["${userStatus}" == ""]
 			
 		
 
@@ -276,7 +275,7 @@ DataGaurdPreInstall(){
     logging -p $ProgramName -f $LOGFILE -l INFO -m "Checking if init${OracleSid}.ora exits  !!!!!"
     
     
-    if [ ! -f $OracleHome/dbs/init${OracleSid}.ora ] then
+    if [ ! -f $OracleHome/dbs/init${OracleSid}.ora ]; then
     
           echo "NEED TO CREATE"
           logging -p $ProgramName -f $LOGFILE -l WARNING -m "File init${OracleSid}.ora doesnot Exist !!!!!"
@@ -287,7 +286,7 @@ DataGaurdPreInstall(){
           echo "db_name=$Dbname" >> $OracleHome/dbs/init${OracleSid}.ora
           logging -p $ProgramName -f $LOGFILE -l INFO -m "SuccessFully writted   db_name=$Dbname  to init${OracleSid}.ora    !!!!!"
           
-    elif [ ! -f $OracleHome/network/admin/listener.ora ] then
+    elif [ ! -f $OracleHome/network/admin/listener.ora ]; then
           
           logging -p $ProgramName -f $LOGFILE -l WARNING -m "Listener file Does not Exists !!!!!"
          
