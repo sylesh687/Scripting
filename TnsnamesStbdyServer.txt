@@ -6,7 +6,7 @@ EON12 =
   (DESCRIPTION =
     (ADDRESS_LIST =
           (ADDRESS = (PROTOCOL = TCP)
-                     (HOST = defreon3318.eontstmpc.svcs.hpe.com)
+                     (HOST = "")
                      (PORT = 1521) )
 
     )
@@ -21,7 +21,7 @@ SEON12 =
   (DESCRIPTION =
     (ADDRESS_LIST =
           (ADDRESS = (PROTOCOL = TCP)
-                     (HOST = defreon3320.eontstmpc.svcs.hpe.com)
+                     (HOST = "")
                      (PORT = 1521) )
 
     )

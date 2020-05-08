@@ -5,7 +5,6 @@
 # Description: This Script Prepares Standby Server For DataGaurd
 # Version: 1.0
 # Maintainer: Shailesh Thakur
-# Example:sh ConfigureStandyServer.sh -d "EONT12" -f "EONT12" -g "defreon3332.eontstmpc.svcs.hpe.com" -h "defreon3342.eontstmpc.svcs.hpe.com" 
 # ---------------------------------------------------------------------------------
 
 
